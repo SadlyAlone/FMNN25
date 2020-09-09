@@ -88,6 +88,15 @@ class TestSpline(unittest.TestCase):
       for i in range(idx-2, idx+2):
         sum += spline.make_basis_function(i)(val)
       self.assertAlmostEqual(sum, 1)
+      
+  def test_basis_positivity(self):
+    spline = cubic_spline.cubic_spline(self.grid, self.CONTROL)
+    u = np.linspace(0,1,101)
+    for val in u:
+      idx = spline.find_hot_interval(val)
+      sum = 0;
+      for i in range(idx-2, idx+2):
+        assert(spline.make_basis_function(i)(val) >= 0)
 
   def test_interpolation(self):
     spline = cubic_spline.cubic_spline(self.grid, self.CONTROL)
@@ -97,7 +106,7 @@ class TestSpline(unittest.TestCase):
     new_spline = cubic_spline.cubic_spline(self.grid, new_ctrl_points)
 
     assert(new_spline(new_spline.grid[0])[0] == self.interpolation_points[0][0])
-    
+
 
 
 if __name__ =='__main__' :
