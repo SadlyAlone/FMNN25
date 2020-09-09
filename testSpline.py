@@ -3,6 +3,8 @@ import cubic_spline
 import numpy as np
 
 class TestSpline(unittest.TestCase):
+
+
   CONTROL = [(-12.73564, 9.03455),
   (-26.77725, 15.89208),
   (-42.12487, 20.57261),
@@ -27,6 +29,16 @@ class TestSpline(unittest.TestCase):
   (14.36797, 3.91883),
   (27.59321, 9.68786),
   (39.67575, 17.30712)]
+  interpolation_points = np.array([[5.,4.],
+  [2.,6.],
+  [1.,1.],
+  [3.,3.],
+  [4.,2.],
+  [6.,2.],
+  [7.,3.],
+  [8.,0.],
+  [8.,6.],
+  [10.,8.]])
   grid = np.linspace(0,1,26)
   spline = cubic_spline.cubic_spline(grid, CONTROL)
 
@@ -76,6 +88,16 @@ class TestSpline(unittest.TestCase):
       for i in range(idx-2, idx+2):
         sum += spline.make_basis_function(i)(val)
       self.assertAlmostEqual(sum, 1)
+
+  def test_interpolation(self):
+    spline = cubic_spline.cubic_spline(self.grid, self.CONTROL)
+    dy, dx = spline.spline_interpolation(self.interpolation_points);
+    new_ctrl_points = np.hstack((dy, dx))
+    #print(new_ctrl_points)
+    new_spline = cubic_spline.cubic_spline(self.grid, new_ctrl_points)
+
+    assert(new_spline(new_spline.grid[0])[0] == self.interpolation_points[0][0])
+    
 
 
 if __name__ =='__main__' :
