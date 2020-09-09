@@ -119,7 +119,7 @@ class cubic_spline:
     In: parameter value u and index idx
     Out: 1 if u is within interval of index I to I+1
     """
-    grid = self.grid#[2:-3]
+    grid = self.grid
     #Return zero if grid points coincide
     if grid[idx-1] == grid[idx]:
       return 0
@@ -137,7 +137,7 @@ class cubic_spline:
     In: index idx and polynomial degree k
     Out: basis function N(u)
     """
-    grid = self.grid#[2:-3]
+    grid = self.grid
     #Call step function for last step of recursion
     if k == 0:
       return lambda u: self.step_fun(u, idx)
@@ -183,8 +183,8 @@ class cubic_spline:
 
   def plot_spline(self, n = 51, control_polygon = False):
     """
-    Plots the the spline that the class spits out.
-    In: n determines how many points the plot has.
+    Plots the spline that the class spits out.
+    In: n determines how many points the plot has. control_polygon, boolean,
     Out: plots the spline.
     Written by: Halli
     """
@@ -197,3 +197,60 @@ class cubic_spline:
       ctrl_x, ctrl_y = zip(*self.ctrl_points)
       plt.scatter(ctrl_x,ctrl_y,c='r')
       plt.plot(ctrl_x,ctrl_y,'r--')
+
+  def greville_abscissae(self):
+    """
+    Takes a set of gridpoints u and returns the Greville Abscissae
+
+    Parameters
+    ----------
+    u: the array of grid points
+
+    Returns
+    -------
+    the Greville abscissae.
+
+    """
+    u_temp = self.grid
+    #np.insert(u_temp,0,u_temp[0])
+    #np.insert(u_temp,0,u_temp[0])
+    #np.insert(u_temp,-1,u_temp[-1])
+    #np.insert(u_temp,-1,u_temp[-1])
+    greville_abscissae = [(u_temp[i] + u_temp[i+1] + u_temp[i+2])/3 for i in range(len(u_temp)-2)]
+    return np.asarray(greville_abscissae)
+
+
+  def spline_interpolation(self,interpolation_points):
+    #x,y = zip(*interpolations_points)
+    y = interpolation_points[:,0:1]
+    x = interpolation_points[:,1:2]
+    xi = self.greville_abscissae()
+    L = len(x)
+    N = np.zeros([L,L])
+
+    func = self.make_basis_function(0)
+    N[0][0] = func(xi[0])
+    N[1][0] = func(xi[1])
+    N[2][0] = func(xi[2])
+
+    for i in range(1,L-2):
+        func = self.make_basis_function(i)
+        N[i-1][i] = func(xi[i-1])
+        N[i][i] = func(xi[i])
+        N[i+1][i] = func(xi[i+1])
+        N[i+2][i] = func(xi[i+2])
+
+    func = self.make_basis_function(L-2)
+    N[L-3][L-2] = func(xi[L-3])
+    N[L-2][L-2] = func(xi[L-2])
+    N[L-1][L-2] = func(xi[L-1])
+
+    func = self.make_basis_function(L-1)
+    N[L-2][L-1] = func(xi[L-2])
+    N[L-1][L-1] = func(xi[L-1])
+
+    #dy = la.solve_banded((2,1), N, y)
+    #dx = la.solve_banded((2,1), N, x)
+    dy = la.solve(N, y)
+    dx = la.solve(N, x)
+    return dy,dx
