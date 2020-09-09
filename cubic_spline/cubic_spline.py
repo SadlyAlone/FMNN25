@@ -221,6 +221,10 @@ class cubic_spline:
 
 
   def spline_interpolation(self,interpolation_points):
+    """
+    takes a set of interpolation points and creates control points
+    that can be used to created a spline with the class.
+    """
     #x,y = zip(*interpolations_points)
     y = interpolation_points[:,0:1]
     x = interpolation_points[:,1:2]

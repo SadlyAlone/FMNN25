@@ -88,7 +88,7 @@ class TestSpline(unittest.TestCase):
       for i in range(idx-2, idx+2):
         sum += spline.make_basis_function(i)(val)
       self.assertAlmostEqual(sum, 1)
-      
+
   def test_basis_positivity(self):
     spline = cubic_spline.cubic_spline(self.grid, self.CONTROL)
     u = np.linspace(0,1,101)
