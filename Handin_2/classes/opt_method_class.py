@@ -18,6 +18,7 @@ class opt_method_class:
             self.x_0 = x_0 + line_search_factor()*search_dir()
             if la.norm(x - x_old) < self.tol:
                 cond = True
+        return x
 
     def line_search_factor():
         return 1
@@ -37,9 +38,16 @@ class regular_newton(opt_method_class):
         return
 
         #Do something here
+
     def exact_line_search(x, dir):
+
+        """
+        Exact line search using the bisection method
+        In: x is the current point, dir is the search direction
+        Out: returnes the stepsize the minimized the search function
+        """
         #This is an implementation of the bisection method for exact line search
-        #Define an interval starting at the function evaluation at our current x
+        #Define an interval starting at the search function evaluation at our current x
         search_func = lambda step: OP_class(*(x + step*dir))
         a = search_func(0);
         step_size = 1
