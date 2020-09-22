@@ -3,43 +3,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as la
 from .OP_class import OP_class
+from .hessian_approximation import hessian_approximation
 
-class opt_method_class:
-    def __init(OP_class, x_0, tol):
-        self.OP_class = OP_class
+class Opt_method_class():
+    def __init__(self, opt_prob, x_0, tol):
+        self.opt_prob = opt_prob
         self.x_0 = x_0
         self.tol = tol
 
-    def find_min():
-        cond = False
+    def find_min(self):
+        cond = True
         x = self.x_0
-        x_old = x
+
         while cond:
-            self.x_0 = x_0 + line_search_factor()*search_dir()
+            x_old = x
+            #h should not be hardcoded
+            h = 0.00001
+            dir = self.search_dir(x, h)
+            x = x + self.line_search_factor(x, dir)*dir
+            print(x)
+            print(x_old)
             if la.norm(x - x_old) < self.tol:
-                cond = True
+                cond = False
         return x
 
-    def line_search_factor():
+    def line_search_factor(self):
         return 1
 
-    def hessian_dir(x):
+    def search_dir(self, x):
         return 1
 
-class regular_newton(opt_method_class):
+class Regular_newton(Opt_method_class):
 
-    def __init__(self, OP_class, x_0, tol):
-        super().__init__(OP_class, x_0, tol)
+    def __init__(self, opt_prob, x_0, tol):
+        Opt_method_class.__init__(self, opt_prob, x_0, tol)
 
-    def line_search_factor():
-        return
-        #Do SOMETHING HERE
-    def search_dir():
-        return
 
-        #Do something here
+    def line_search_factor(self, x, dir):
+        return self.exact_line_search(x, dir)
 
-    def exact_line_search(x, dir):
+    def search_dir(self, x,h):
+        gradient = self.opt_prob.hessian_approx.gradient(opt_prob)
+        return self.opt_prob.get_hessian(x,h)
+
+
+
+    def exact_line_search(self, x, dir):
 
         """
         Exact line search using the bisection method
@@ -48,13 +57,15 @@ class regular_newton(opt_method_class):
         """
         #This is an implementation of the bisection method for exact line search
         #Define an interval starting at the search function evaluation at our current x
-        search_func = lambda step: OP_class(*(x + step*dir))
+        search_func = lambda step: self.opt_prob(x + step*dir)
         a = search_func(0);
         step_size = 1
         b = a
 
         #Search in the search direction until the sign changes, then the minimum is within
         #this interval
+        print(a)
+        print(b)
         while np.sign(a)*np.sign(b) > 0:
             b = search_func(step_size)
             stepSize = stepSize*2
