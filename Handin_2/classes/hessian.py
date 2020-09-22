@@ -9,17 +9,17 @@ Created on Thu Sep 17 13:51:57 2020
 import numpy as np
 
 class hessian_approximation:
-    
+
     def __init__(self,f,gradient=False):
         self.f = f
-        
+
     def __call__(self,x,h):
         return self.hessian(x,h)
-    
+
 
     def gradient(self,f,x,h):
         """
-    
+
         Parameters
         ----------
         f : TYPE
@@ -28,12 +28,12 @@ class hessian_approximation:
             DESCRIPTION.
         h : TYPE
             DESCRIPTION.
-    
+
         Returns
         -------
         TYPE
             DESCRIPTION.
-    
+
         """
         g = []
         for i in range(len(x)):
@@ -42,12 +42,12 @@ class hessian_approximation:
             a = (f(x + e_basis) - f(x))/h
             g.append(a)
         return np.asarray(g)
-    
-    
+
+
     def derivative_approx(self,x, h, i):
         """
-        
-    
+
+
         Parameters
         ----------
         f : TYPE
@@ -58,21 +58,21 @@ class hessian_approximation:
             DESCRIPTION.
         i : TYPE
             DESCRIPTION.
-    
+
         Returns
         -------
         TYPE
             DESCRIPTION.
-    
+
         """
         e_basis = np.zeros(len(x))
         e_basis[i] = h
         return lambda x: (self.f(x+e_basis) - self.f(x))/h
-    
+
     def hessian(self,x,h):
         """
-        
-    
+
+
         Parameters
         ----------
         f : TYPE
@@ -81,12 +81,12 @@ class hessian_approximation:
             DESCRIPTION.
         h : TYPE
             DESCRIPTION.
-    
+
         Returns
         -------
         H : TYPE
             DESCRIPTION.
-    
+
         """
         H = self.gradient(self.derivative_approx(x, h, 0), x, h)
         for i in range(1,len(x)):
