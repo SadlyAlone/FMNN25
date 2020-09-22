@@ -1,4 +1,4 @@
-class OP_class:
+class optimisation_problem_class:
     def __init__(self, function, gradient=None):
         self.function = function
         self.gradient = gradient

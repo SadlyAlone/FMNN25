@@ -2,11 +2,11 @@ from scipy import *
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as la
-from .OP_class import OP_class
+from .optimisation_problem_class import optimisation_problem_class
 
-class opt_method_class:
-    def __init(OP_class, x_0, tol):
-        self.OP_class = OP_class
+class optimisation_method_class:
+    def __init(optimisation_problem_class, x_0, tol):
+        self.optimisation_problem_class = optimisation_problem_class
         self.x_0 = x_0
         self.tol = tol
 
@@ -26,10 +26,10 @@ class opt_method_class:
     def hessian_dir(x):
         return 1
 
-class regular_newton(opt_method_class):
+class regular_newton(optimisation_method_class):
 
-    def __init__(self, OP_class, x_0, tol):
-        super().__init__(OP_class, x_0, tol)
+    def __init__(self, optimisation_problem_class, x_0, tol):
+        super().__init__(optimisation_problem_class, x_0, tol)
 
     def line_search_factor():
         return
@@ -48,7 +48,7 @@ class regular_newton(opt_method_class):
         """
         #This is an implementation of the bisection method for exact line search
         #Define an interval starting at the search function evaluation at our current x
-        search_func = lambda step: OP_class(*(x + step*dir))
+        search_func = lambda step: optimisation_problem_class(*(x + step*dir))
         a = search_func(0);
         step_size = 1
         b = a

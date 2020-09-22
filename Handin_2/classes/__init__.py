@@ -1,2 +1,2 @@
-from .OP_class import OP_class
-from .opt_method_class import opt_method_class
+from .optimisation_problem_class import optimisation_problem_class
+from .optimisation_method_class import optimisation_method_class
