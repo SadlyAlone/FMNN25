@@ -2,14 +2,14 @@ from scipy import *
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as la
-from .OP_class import OP_class
-from .hessian_approximation import hessian_approximation
+from .hessian import hessian_approximation
+from .problem_class import optimisation_problem_class
 
-class Opt_method_class():
-    def __init__(self, opt_prob, x_0, tol):
-        self.opt_prob = opt_prob
+class optimisation_method_class:
+    def __init__(self, optimisation_problem_class, x_0, tolerance):
+        self.optimisation_problem_class = optimisation_problem_class
         self.x_0 = x_0
-        self.tol = tol
+        self.tolerance = tolerance
 
     def find_min(self):
         cond = True
@@ -23,7 +23,7 @@ class Opt_method_class():
             x = x + self.line_search_factor(x, dir)*dir
             print(x)
             print(x_old)
-            if la.norm(x - x_old) < self.tol:
+            if la.norm(x - x_old) < self.tolerance:
                 cond = False
         return x
 
@@ -33,20 +33,17 @@ class Opt_method_class():
     def search_dir(self, x):
         return 1
 
-class Regular_newton(Opt_method_class):
+class regular_newton(optimisation_method_class):
 
-    def __init__(self, opt_prob, x_0, tol):
-        Opt_method_class.__init__(self, opt_prob, x_0, tol)
+    def __init__(self, optimisation_problem_class, x_0, tol):
+        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
 
 
     def line_search_factor(self, x, dir):
         return self.exact_line_search(x, dir)
 
     def search_dir(self, x,h):
-        gradient = self.opt_prob.hessian_approx.gradient(opt_prob)
-        return self.opt_prob.get_hessian(x,h)
-
-
+        return self.optimisation_problem_class.get_hessian(x,h)
 
     def exact_line_search(self, x, dir):
 
@@ -57,7 +54,7 @@ class Regular_newton(Opt_method_class):
         """
         #This is an implementation of the bisection method for exact line search
         #Define an interval starting at the search function evaluation at our current x
-        search_func = lambda step: self.opt_prob(x + step*dir)
+        search_func = lambda step: self.optimisation_problem_class(x + step*dir)
         a = search_func(0);
         step_size = 1
         b = a

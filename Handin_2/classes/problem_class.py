@@ -1,5 +1,5 @@
-from .hessian_approximation import hessian_approximation
-class OP_class:
+from .hessian import hessian_approximation
+class optimisation_problem_class:
     def __init__(self, function, gradient=None):
         self.function = function
         self.gradient = gradient
