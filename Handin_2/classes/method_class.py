@@ -21,21 +21,47 @@ class optimisation_method_class:
     This is the method you shold call on the children of this class to find the minimum using
     the specific methods defined in the child class.
     """
-    def find_min(self):
+    def find_min(self, plot=False):
         cond = True
         x = self.x_0
+        x_old = []
 
         while cond:
-            x_old = x
+            x_old.append(x)
             #h should not be hardcoded
             h = 0.0000001
             dir = self.search_dir(x, h)
             a = self.line_search_factor(x, h, dir)
+            print(x)
             x = x + a*dir
 
-            if la.norm(x - x_old) < self.tolerance:
+            if la.norm(x - x_old[-1]) < self.tolerance:
                 cond = False
+        """
+        This creates a plot over the convergence of our x and a
+        contour plot of the rosenbrock function, should probably be moved
+        to separate thing
 
+            if plot:
+                x = [item[0] for item in x_old]
+                y = [item[1] for item in x_old]
+                start, stop, n_values = -25, 25, 800
+                x_vals = np.linspace(start, stop, n_values)
+                y_vals = np.linspace(start, stop, n_values)
+                rosenbrock = lambda x,y: 100*(y-x**2)**2 + (1-x)**2
+                X, Y = np.meshgrid(x_vals,y_vals)
+
+                Z = rosenbrock(X,Y)
+
+                cp = plt.contourf(X, Y, Z)
+                plt.colorbar(cp)
+
+                plt.scatter(self.x_0[0],self.x_0[1], marker="s")
+                plt.scatter(x[-1],y[-1], marker="x")
+                plt.plot(x,y)
+
+                plt.show()
+        """
         return x
     #Method to be inherited by children
     def line_search_factor(self):
@@ -77,11 +103,11 @@ class regular_newton(optimisation_method_class):
         step_size = 0.01
         b = a
         #Search in the search direction until the sign changes, then the minimum is within
-        #this interval
+        #this interval, SEEMS LIKE WE SOMETIME SEARCH IN A NON DESCENT DIRECTION WHICH MAKES THIS LOOP RUN ENDLESSLY
         while search_func(a)*search_func(b) > 0:
             step_size = step_size*2
             b = search_func(step_size)
-            
+
         #Halve the interval until it has reached a certain length
 
         while abs(b-a) > self.tolerance:

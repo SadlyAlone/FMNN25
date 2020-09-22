@@ -8,12 +8,15 @@ def g(x):
     return x[0]*x[0] + x[1]*x[1]
 def f(x):
     return
-def r(x):
+def rosenbrock(x):
     return 100*((x[1] - x[0]*x[0])**2) + (1 - x[0])**2
+
 def rgrad(x):
     return [400*x[0]- 400*x[0]*x[1] + 2*x[0] - 2, 200*(x[1]-x[0]*x[0])]
 
 
-optimization_problem = optimisation_problem_class(r)
-regular_newton = regular_newton(optimization_problem, [-22,10], 0.0001)
-print(regular_newton.find_min())
+optimization_problem = optimisation_problem_class(rosenbrock)
+#Does not converge for all X due to naive newton implementation.
+#Sometimes we cant invert hessian, sometimes search direction is not descent direction
+regular_newton = regular_newton(optimization_problem, [1.9,1.9], 0.0001)
+print(regular_newton.find_min(True))
