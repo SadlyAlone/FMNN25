@@ -33,5 +33,5 @@ optimization_problem = optimisation_problem_class(test_func)
 #DFP = david_fletcher_powell(optimization_problem, [1.5,1.5], 1e-5)
 #print(DFP.find_min(iterations=2,h=1e-5)[-1])
 
-GB = good_broyden(optimization_problem, [1.1,-0.6], 1e-3)
+GB = good_broyden(optimization_problem, [1.1, -.6], 1e-3)
 print(GB.find_min(h=1e-2)[-1])

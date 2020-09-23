@@ -131,6 +131,43 @@ class good_broyden(optimisation_method_class):
         self.update_hessian(x_new, x, h)
 
         return x + a*dir
+
+    def update_hessian(self, x, x_old, h):
+
+        g_old = np.array(self.optimisation_problem_class.gradient_approx(x_old, h))
+        g_new = np.array(self.optimisation_problem_class.gradient_approx(x, h))
+        delta = x - x_old
+        gamma = g_new - g_old
+        H = self.H_estimate
+        self.H_estimate = H + ((delta - H@gamma)@(H@delta).T)/(H@delta.T @ gamma)
+
+class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
+
+    def __init__(self, optimisation_problem_class, x_0, tol):
+        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
+        self.H_estimate = np.eye(len(x_0))
+
+    #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
+    def line_search_factor(self, x, h, dir):
+        return self.exact_line_search(x, h, dir)
+    #Calculates the newton direction using approximation methods contained in hessian.py
+    def search_dir(self, x, h):
+        gradient = np.array(self.optimisation_problem_class.gradient_approx(x, h))
+
+        hessian = np.array(self.optimisation_problem_class.hessian_approx(x, h))
+
+        return -self.H_estimate @ gradient
+
+    def update_x(self, x, h):
+
+        dir = self.search_dir(x, h)
+        a = self.line_search_factor(x, h, dir)
+        x_new = x + a*dir
+
+        self.update_hessian(x_new, x, h)
+
+        return x + a*dir
+
     def update_hessian(self, x, x_old, h):
 
         g_old = np.array(self.optimisation_problem_class.gradient_approx(x_old, h))
@@ -197,69 +234,6 @@ class david_fletcher_powell(optimisation_method_class):
         q = np.array(self.optimisation_problem_class.gradient_approx(y, h)) - \
             np.array(self.optimisation_problem_class.gradient_approx(y_old, h))
 
-        first_term = 1/(p @ q)*(p @ p)
-
-        second_term_first = 1 / (q @ self.D @ q)
-
-        second_term_second = self.D @ q @ q
-
-        second_term_final = second_term_first*second_term_second*self.D
-
-        self.D = self.D + first_term - second_term_final
-
-
-        return
-class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
-
-    def __init__(self, optimisation_problem_class, x_0, tol):
-        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
-        self.D = np.identity(len(x_0))
-
-    #We have to overrite the find_min function to contain the second loop
-    #h is for estimating derivatives (close to 0 relative to the scale of the function)
-    #iterations is the number of times you want to run the second iteration loop.
-    def find_min(self, iterations=2, h=1e-5, ):
-        cond = True
-        x = self.x_0
-        x_all = []
-        while cond:
-            x_all.append(x)
-            print(x)
-            x = self.update_x(x, h, iterations)
-
-            if la.norm(x - x_all[-1]) < self.tolerance:
-                cond = False
-        return x_all
-
-    def update_x(self, x, h, iterations):
-        self.D = np.identity(len(x))
-        y = x
-        for i in range(iterations):
-            d_i = self.search_dir(y, h)
-            a = self.line_search_factor(y, h, d_i)
-            y_old = y
-            y = y + a*d_i
-            self.update_D(y, y_old, h)
-        return y
-
-
-    #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
-    def line_search_factor(self, x, h, dir):
-        return self.exact_line_search(x, h, dir)
-    #Calculates the newton direction using approximation methods contained in hessian.py
-    def search_dir(self, x, h):
-        gradient = np.array(self.optimisation_problem_class.gradient_approx(x, h))
-        return -self.D @ gradient
-
-    #This method updates the matrix D in each step of the inner loop of the DFP algorithm
-    def update_D(self, y, y_old, h):
-
-        p = np.array(np.subtract(y, y_old))
-
-        q = np.array(self.optimisation_problem_class.gradient_approx(y, h)) - \
-            np.array(self.optimisation_problem_class.gradient_approx(y_old, h))
-        #first_term_first = (1 + (q @ self.D @ q)/(p @ q)
-        #first_term_second =
         first_term = 1/(p @ q)*(p @ p)
 
         second_term_first = 1 / (q @ self.D @ q)
