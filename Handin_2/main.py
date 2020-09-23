@@ -26,5 +26,5 @@ def rgrad(x):
 #optimization_problem = optimisation_problem_class(g)
 #DFP = david_fletcher_powell(optimization_problem, [0.3,0.3], 1e-2)
 optimization_problem = optimisation_problem_class(rosenbrock)
-DFP = david_fletcher_powell(optimization_problem, [0.9,0.9], 1e-5)
-print(DFP.find_min(iterations=2)[-1])
+DFP = david_fletcher_powell(optimization_problem, [1.5,1.5], 1e-5)
+print(DFP.find_min(iterations=2,h=1e-5)[-1])
