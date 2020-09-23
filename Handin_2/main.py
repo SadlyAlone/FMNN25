@@ -24,14 +24,20 @@ def test_func(x):
 #optimization_problem = optimisation_problem_class(rosenbrock)
 #Does not converge for all X due to naive newton implementation.
 #Sometimes we cant invert hessian, sometimes search direction is not descent direction
-#regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
-#print(regular_newton.find_min(1e-8))
+print('Here we use the regular newton with exact line search on the rosenbrock function, x_0 = [2,2]')
+input('Press enter to continue')
+optimization_problem = optimisation_problem_class(rosenbrock)
+regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
+regular_newton.find_min(1e-8)
 
 #optimization_problem = optimisation_problem_class(g)
 #DFP = david_fletcher_powell(optimization_problem, [0.3,0.3], 1e-2)
-optimization_problem = optimisation_problem_class(test_func)
+
 #DFP = david_fletcher_powell(optimization_problem, [1.5,1.5], 1e-5)
 #print(DFP.find_min(iterations=2,h=1e-5)[-1])
+print('Here we use the good broyden with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1,-0.6]')
+input('Press enter to continue')
+optimization_problem = optimisation_problem_class(test_func)
 
 GB = good_broyden(optimization_problem, [1.1, -.6], 1e-3)
 print(GB.find_min(h=1e-2)[-1])

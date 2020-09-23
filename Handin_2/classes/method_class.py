@@ -170,12 +170,7 @@ class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
 
     def update_hessian(self, x, x_old, h):
 
-        g_old = np.array(self.optimisation_problem_class.gradient_approx(x_old, h))
-        g_new = np.array(self.optimisation_problem_class.gradient_approx(x, h))
-        delta = x - x_old
-        gamma = g_new - g_old
-        H = self.H_estimate
-        self.H_estimate = H + ((delta - H@gamma)@(H@delta).T)/(H@delta.T @ gamma)
+        self.H_estimate = H + (1 + (gamma.T@H@gamma)/(np.inner(delta,gamma)))*((np.outer(delta,delta)/np.inner(delta,gamma))) - (np.outer(delta,gamma)@H + H@np.outer(gamma,delta))/(np.inner(delta,gamma))
 
 """
 This is the DFP optimization algorith that extends the general optimisation_method_class
