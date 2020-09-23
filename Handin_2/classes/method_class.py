@@ -21,48 +21,22 @@ class optimisation_method_class:
     This is the method you shold call on the children of this class to find the minimum using
     the specific methods defined in the child class.
     """
-    def find_min(self, plot=False):
+    def find_min(self, h=1e-5):
         cond = True
         x = self.x_0
-        x_old = []
+        x_all = []
 
         while cond:
-            x_old.append(x)
-            #h should not be hardcoded
-            h = 0.0000001
+            x_all.append(x)
+
             dir = self.search_dir(x, h)
             a = self.line_search_factor(x, h, dir)
             print(x)
             x = x + a*dir
 
-            if la.norm(x - x_old[-1]) < self.tolerance:
+            if la.norm(x - x_all[-1]) < self.tolerance:
                 cond = False
-        """
-        This creates a plot over the convergence of our x and a
-        contour plot of the rosenbrock function, should probably be moved
-        to separate thing
-
-            if plot:
-                x = [item[0] for item in x_old]
-                y = [item[1] for item in x_old]
-                start, stop, n_values = -25, 25, 800
-                x_vals = np.linspace(start, stop, n_values)
-                y_vals = np.linspace(start, stop, n_values)
-                rosenbrock = lambda x,y: 100*(y-x**2)**2 + (1-x)**2
-                X, Y = np.meshgrid(x_vals,y_vals)
-
-                Z = rosenbrock(X,Y)
-
-                cp = plt.contourf(X, Y, Z)
-                plt.colorbar(cp)
-
-                plt.scatter(self.x_0[0],self.x_0[1], marker="s")
-                plt.scatter(x[-1],y[-1], marker="x")
-                plt.plot(x,y)
-
-                plt.show()
-        """
-        return x
+        return x_all
     #Method to be inherited by children
     def line_search_factor(self):
         return 1
