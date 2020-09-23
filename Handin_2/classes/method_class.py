@@ -79,19 +79,17 @@ class good_broyden(optimisation_method_class):
     def search_dir(self, x):
         gradient = np.array(self.optimisation_problem_class.gradient_approx(x))
 
-        hessian = np.array(self.optimisation_problem_class.hessian_approx(x))
-
         return -self.H_estimate @ gradient
 
     def update_x(self, x):
 
         dir = self.search_dir(x)
         a = self.line_search_factor(x, dir)
-        x_new = x + a*dir
+        x_new = x + a[0]*dir
 
         self.update_hessian(x_new, x)
 
-        return x + a*dir
+        return x_new
 
     def update_hessian(self, x, x_old):
 
@@ -123,11 +121,11 @@ class bad_broyden(optimisation_method_class):
 
         dir = self.search_dir(x)
         a = self.line_search_factor(x, dir)
-        x_new = x + a*dir
+        x_new = x + a[0]*dir
 
         self.update_hessian(x_new, x)
 
-        return x + a*dir
+        return x_new
 
     def update_hessian(self, x, x_old):
 
@@ -159,11 +157,11 @@ class symmetric_broyden(optimisation_method_class):
 
         dir = self.search_dir(x)
         a = self.line_search_factor(x, dir)
-        x_new = x + a*dir
+        x_new = x + a[0]*dir
 
         self.update_hessian(x_new, x)
 
-        return x + a*dir
+        return x + a[0]*dir
 
     def update_hessian(self, x, x_old):
 
@@ -198,14 +196,18 @@ class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
 
         dir = self.search_dir(x)
         a = self.line_search_factor(x, dir)
-        x_new = x + a*dir
+        x_new = x + a[0]*dir
 
         self.update_hessian(x_new, x)
 
-        return x + a*dir
+        return x_new
 
     def update_hessian(self, x, x_old):
-
+        g_old = np.array(self.optimisation_problem_class.gradient_approx(x_old))
+        g_new = np.array(self.optimisation_problem_class.gradient_approx(x))
+        delta = x - x_old
+        gamma = g_new - g_old
+        H = self.H_estimate
         self.H_estimate = H + (1 + (gamma.T@H@gamma)/(np.inner(delta,gamma)))*((np.outer(delta,delta)/np.inner(delta,gamma))) - (np.outer(delta,gamma)@H + H@np.outer(gamma,delta))/(np.inner(delta,gamma))
 
 """
@@ -244,7 +246,7 @@ class david_fletcher_powell(optimisation_method_class):
 
 
             y_old = y
-            y = y + a*d_i
+            y = y + a[0]*d_i
             self.update_D(y, y_old)
         return y
 
@@ -260,6 +262,7 @@ class david_fletcher_powell(optimisation_method_class):
     #This method updates the matrix D in each step of the inner loop of the DFP algorithm
     def update_D(self, y, y_old):
 
+        #Both p and q close to zero sometimes, this is not that good
         p = np.array(np.subtract(y, y_old))
 
         q = np.array(self.optimisation_problem_class.gradient_approx(y)) - \
