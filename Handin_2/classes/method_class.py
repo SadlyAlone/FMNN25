@@ -28,6 +28,7 @@ class optimisation_method_class:
 
         while cond:
             x_all.append(x)
+            print(x)
 
             dir = self.search_dir(x, h)
             a = self.line_search_factor(x, h, dir)
@@ -86,7 +87,6 @@ class regular_newton(optimisation_method_class):
 
     def __init__(self, optimisation_problem_class, x_0, tol):
         optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
-        self.D = np.identity(length(x_0))
 
     #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
     def line_search_factor(self, x, h, dir):
@@ -112,7 +112,7 @@ class david_fletcher_powell(optimisation_method_class):
     #We have to overrite the find_min function to contain the second loop
     #h is for estimating derivatives (close to 0 relative to the scale of the function)
     #iterations is the number of times you want to run the second iteration loop.
-    def find_min(self, h=1e-5, iterations):
+    def find_min(self, iterations=2, h=1e-5, ):
         cond = True
         x = self.x_0
         x_all = []
@@ -120,6 +120,7 @@ class david_fletcher_powell(optimisation_method_class):
         while cond:
             self.D = np.identity(len(x))
             x_all.append(x)
+            print(x)
             y = x
             for i in range(iterations):
                 d_i = self.search_dir(y, h)

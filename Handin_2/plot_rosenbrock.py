@@ -20,8 +20,6 @@ regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
 x_iter = regular_newton.find_min(1e-8)
 
 
-print(rosenbrock_lam(2,2))
-
 x = [item[0] for item in x_iter]
 y = [item[1] for item in x_iter]
 start, stop, n_values = -5, 5, 800
