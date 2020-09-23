@@ -4,6 +4,8 @@ from classes.method_class import regular_newton
 from classes.method_class import david_fletcher_powell
 from classes.hessian import hessian_approximation
 from classes.method_class import good_broyden
+from classes.inexact_line_search import inexact_line_search
+from classes.exact_line_search import exact_line_search
 
 
 #Some functions to test the newton method on
@@ -26,9 +28,12 @@ def test_func(x):
 #Sometimes we cant invert hessian, sometimes search direction is not descent direction
 print('Here we use the regular newton with exact line search on the rosenbrock function, x_0 = [2,2]')
 input('Press enter to continue')
-optimization_problem = optimisation_problem_class(rosenbrock)
-regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
-regular_newton.find_min(1e-8)
+
+optimization_problem = optimisation_problem_class(rosenbrock, h=1e-8)
+line_search = exact_line_search(rosenbrock, optimization_problem.gradient_approx, tolerance = 1e-10)
+regular_newton = regular_newton(optimization_problem, [2,2], 1e-10, line_search)
+
+regular_newton.find_min()
 
 #optimization_problem = optimisation_problem_class(g)
 #DFP = david_fletcher_powell(optimization_problem, [0.3,0.3], 1e-2)
@@ -37,7 +42,9 @@ regular_newton.find_min(1e-8)
 #print(DFP.find_min(iterations=2,h=1e-5)[-1])
 print('Here we use the good broyden with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1,-0.6]')
 input('Press enter to continue')
-optimization_problem = optimisation_problem_class(test_func)
 
-GB = good_broyden(optimization_problem, [1.1, -.6], 1e-3)
-print(GB.find_min(h=1e-2)[-1])
+optimization_problem = optimisation_problem_class(test_func, h=1e-7)
+line_search = exact_line_search(test_func, optimization_problem.gradient_approx, tolerance = 1e-10)
+
+GB = good_broyden(optimization_problem, [1.1, -.6], 1e-10, line_search)
+print(GB.find_min()[-1])
