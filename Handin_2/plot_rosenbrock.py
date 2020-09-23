@@ -2,6 +2,7 @@ from classes.problem_class import optimisation_problem_class
 from classes.method_class import optimisation_method_class
 from classes.method_class import regular_newton
 from classes.hessian import hessian_approximation
+from classes.exact_line_search import exact_line_search
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,11 +14,12 @@ def rgrad(x):
 
 rosenbrock_lam = lambda x,y: 100*(y-x**2)**2 + (1-x)**2
 
-optimization_problem = optimisation_problem_class(rosenbrock)
+optimization_problem = optimisation_problem_class(rosenbrock, 1e-8)
 #Does not converge for all X due to naive newton implementation.
 #Sometimes we cant invert hessian, sometimes search direction is not descent direction
-regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
-x_iter = regular_newton.find_min(1e-8)
+line_search = exact_line_search(rosenbrock, optimization_problem.gradient_approx, tolerance = 1e-10)
+regular_newton = regular_newton(optimization_problem, [2,2], 1e-10, line_search)
+x_iter = regular_newton.find_min()
 
 
 x = [item[0] for item in x_iter]
