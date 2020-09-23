@@ -43,23 +43,6 @@ class optimisation_method_class:
     #Method to be inherited by children
     def search_dir(self, x):
         return 1
-
-class regular_newton(optimisation_method_class):
-
-    def __init__(self, optimisation_problem_class, x_0, tol):
-        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
-
-    #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
-    def line_search_factor(self, x, h, dir):
-        return self.exact_line_search(x, h, dir)
-    #Calculates the newton direction using approximation methods contained in hessian.py
-    def search_dir(self, x, h):
-        gradient = np.array(self.optimisation_problem_class.gradient_approx(x, h))
-
-        hessian = np.array(self.optimisation_problem_class.hessian_approx(x, h))
-
-        return -np.linalg.inv(hessian) @ gradient
-
     def exact_line_search(self, x, h, dir):
 
         """
@@ -98,3 +81,19 @@ class regular_newton(optimisation_method_class):
         #Return the midpoint of the interval
 
         return (a+b)/2
+
+class regular_newton(optimisation_method_class):
+
+    def __init__(self, optimisation_problem_class, x_0, tol):
+        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
+
+    #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
+    def line_search_factor(self, x, h, dir):
+        return self.exact_line_search(x, h, dir)
+    #Calculates the newton direction using approximation methods contained in hessian.py
+    def search_dir(self, x, h):
+        gradient = np.array(self.optimisation_problem_class.gradient_approx(x, h))
+
+        hessian = np.array(self.optimisation_problem_class.hessian_approx(x, h))
+
+        return -np.linalg.inv(hessian) @ gradient

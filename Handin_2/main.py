@@ -18,5 +18,5 @@ def rgrad(x):
 optimization_problem = optimisation_problem_class(rosenbrock)
 #Does not converge for all X due to naive newton implementation.
 #Sometimes we cant invert hessian, sometimes search direction is not descent direction
-regular_newton = regular_newton(optimization_problem, [1.9,1.9], 0.0001)
-print(regular_newton.find_min(1e-8)
+regular_newton = regular_newton(optimization_problem, [2,2], 1e-10)
+print(regular_newton.find_min(1e-8))
