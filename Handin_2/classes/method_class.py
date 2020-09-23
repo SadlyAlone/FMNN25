@@ -105,6 +105,41 @@ class regular_newton(optimisation_method_class):
 
         return -np.linalg.inv(hessian) @ gradient
 
+class good_broyden(optimisation_method_class):
+
+    def __init__(self, optimisation_problem_class, x_0, tol):
+        optimisation_method_class.__init__(self, optimisation_problem_class, x_0, tol)
+        self.H_estimate = np.eye(len(x_0))
+
+    #Calculates the line search factor, maybe take more parameters to decide if we do inexact or exact, or no line search
+    def line_search_factor(self, x, h, dir):
+        return self.exact_line_search(x, h, dir)
+    #Calculates the newton direction using approximation methods contained in hessian.py
+    def search_dir(self, x, h):
+        gradient = np.array(self.optimisation_problem_class.gradient_approx(x, h))
+
+        hessian = np.array(self.optimisation_problem_class.hessian_approx(x, h))
+
+        return -self.H_estimate @ gradient
+
+    def update_x(self, x, h):
+
+        dir = self.search_dir(x, h)
+        a = self.line_search_factor(x, h, dir)
+        x_new = x + a*dir
+
+        self.update_hessian(x_new, x, h)
+
+        return x + a*dir
+    def update_hessian(self, x, x_old, h):
+
+        g_old = np.array(self.optimisation_problem_class.gradient_approx(x_old, h))
+        g_new = np.array(self.optimisation_problem_class.gradient_approx(x, h))
+        delta = x - x_old
+        gamma = g_new - g_old
+        H = self.H_estimate
+        self.H_estimate = H + ((delta - H@gamma)@(H@delta).T)/(H@delta.T @ gamma)
+
 """
 This is the DFP optimization algorith that extends the general optimisation_method_class
 Unfortunatly I had to update the find_min method since the iteration step is not the same
@@ -223,8 +258,8 @@ class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
 
         q = np.array(self.optimisation_problem_class.gradient_approx(y, h)) - \
             np.array(self.optimisation_problem_class.gradient_approx(y_old, h))
-        first_term_first = (1 + (q @ self.D @ q)/(p @ q)
-        first_term_second = 
+        #first_term_first = (1 + (q @ self.D @ q)/(p @ q)
+        #first_term_second =
         first_term = 1/(p @ q)*(p @ p)
 
         second_term_first = 1 / (q @ self.D @ q)
