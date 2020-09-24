@@ -39,24 +39,24 @@ regular_newton = regular_newton(optimization_problem, [2,2], 1e-10, line_search)
 
 regular_newton.find_min()
 
-"""
+
 print('Here we use the david_fletcher_powell with exact line search on the rosenbrock function x_0 = [1.5, 1.5]')
 input('Press enter to continue')
 
 optimization_problem = optimisation_problem_class(rosenbrock, h=1e-5)
-line_search = exact_line_search(rosenbrock, optimization_problem.gradient_approx, tolerance = 1e-5)
-DFP = david_fletcher_powell(optimization_problem, [1.5,1.5], 1e-4, line_search)
+line_search = exact_line_search(rosenbrock, optimization_problem.gradient_approx, tolerance = 1e-7)
+DFP = david_fletcher_powell(optimization_problem, [1.5,1.5], 1e-5, line_search)
 DFP.find_min(iterations=3)
-"""
+
 
 print('Here we use the good broyden with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1, -0.6]')
 input('Press enter to continue')
 
-optimization_problem = optimisation_problem_class(test_func, h=1e-3)
+optimization_problem = optimisation_problem_class(test_func, h=1e-13)
 line_search = exact_line_search(test_func, optimization_problem.gradient_approx, tolerance = 1e-10)
 
-GB = good_broyden(optimization_problem, [1.1, -.6], 1e-5, line_search)
-GB.find_min()
+GB = good_broyden(optimization_problem, [1.1, -.6], 1e-10, line_search)
+print(GB.find_min()[-1])
 
 print('Here we use the bad broyden with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1, -0.6]')
 input('Press enter to continue')
@@ -65,7 +65,7 @@ optimization_problem = optimisation_problem_class(test_func, h=1e-3)
 line_search = exact_line_search(test_func, optimization_problem.gradient_approx, tolerance = 1e-10)
 
 BB = bad_broyden(optimization_problem, [1.1, -.6], 1e-5, line_search)
-BB.find_min()
+print(BB.find_min()[-1])
 
 print('Here we use the symmetric broyden with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1, -0.6]')
 input('Press enter to continue')
@@ -74,7 +74,7 @@ optimization_problem = optimisation_problem_class(test_func, h=1e-3)
 line_search = exact_line_search(test_func, optimization_problem.gradient_approx, tolerance = 1e-10)
 
 SB = symmetric_broyden(optimization_problem, [1.1, -.6], 1e-5, line_search)
-SB.find_min()
+print(SB.find_min()[-1])
 
 print('Here we use the BFGS with exact line search on f = x^3 + x*y +(x^2)*(y^2) - 3y, (x,y) = [1.1, -0.6]')
 input('Press enter to continue')
@@ -83,4 +83,4 @@ optimization_problem = optimisation_problem_class(test_func, h=1e-3)
 line_search = exact_line_search(test_func, optimization_problem.gradient_approx, tolerance = 1e-10)
 
 BFGS = broyden_fletcher_goldfarb_shanno(optimization_problem, [1.1, -.6], 1e-5, line_search)
-BFGS.find_min()
+print(BFGS.find_min()[-1])

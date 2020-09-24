@@ -51,14 +51,16 @@ class exact_line_search:
         search_func = lambda step: (self.grad(x_0 + step*s) @ s)
 
         #We create an interval starting at the derivative of the current point
-        a = search_func(0);
+        a = 0
+        #a = search_func(0);
         step_size = 0.01
         b = a
         #Search in the search direction until the sign changes, then the minimum is within
         #this interval, SEEMS LIKE WE SOMETIME SEARCH IN A NON DESCENT DIRECTION WHICH MAKES THIS LOOP RUN ENDLESSLY
         while search_func(a)*search_func(b) > 0:
             step_size = step_size*2
-            b = search_func(step_size)
+            b = step_size
+            #b = search_func(step_size)
 
         #Halve the interval until it has reached a certain length
 
