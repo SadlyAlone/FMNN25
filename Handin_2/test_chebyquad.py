@@ -12,8 +12,17 @@ from classes.exact_line_search import exact_line_search
 from chebyquad_problem import *
 
 x=linspace(0,1,8)
-optimization_problem = optimisation_problem_class(chebyquad, gradient=gradchebyquad, h=1e-8)
+optimization_problem = optimisation_problem_class(chebyquad, gradient=gradchebyquad)
 line_search = exact_line_search(chebyquad, gradchebyquad, tolerance = 1e-10)
-regular_newton = regular_newton(optimization_problem, x, 1e-10, line_search)
+regular_newton = regular_newton(optimization_problem, x, 1e-6, line_search)
 
-regular_newton.find_min()
+x_opt = regular_newton.find_min()[-1]
+
+x=linspace(0,1,8)
+xmin= so.fmin_bfgs(chebyquad,x,gradchebyquad)  # should converge after 18 iterations
+print("This is our methods result")
+print(x_opt)
+print("This is scipy's results")
+print(xmin)
+print("This is the difference")
+print(xmin - x_opt)
