@@ -4,6 +4,7 @@ Created on Tue Sep 22 16:15:51 2020
 
 @author: Casper
 """
+import numpy as np
 
 class inexact_line_search:
 
