@@ -50,9 +50,11 @@ class inexact_line_search:
             f_a0: scalar, the objective function evaluated for x + a0*s
 
         """
+        self.s = s
         self.func_alpha = lambda alpha: self.func(x_0 + alpha*s)
         self.grad_alpha = lambda alpha: self.grad(x_0 + alpha*s)
-        #THIS I HARDCODED AND MAYBE SHOULDN'T BE
+
+
         self.a0 = 1
         self.aL = 0
         self.aU = 1e+40
@@ -105,7 +107,7 @@ class inexact_line_search:
             boolean, True if a0 is an acceptable point
 
         """
-        RHS = self.f_aL + self.rho*(self.a0 - self.aL)*self.g_alpha
+        RHS = self.f_aL + self.rho*(self.a0 - self.aL)*self.g_aL
         cond = self.f_a0 <= RHS
         return cond
 
@@ -131,8 +133,8 @@ class inexact_line_search:
         if delta_a0 > min_factor:
             delta_a0 = min_factor
         # Update variable
-        self.aL = a0
-        self.a0 = a0 + delta_a0
+        self.aL = self.a0
+        self.a0 = self.a0 + delta_a0
 
     def interpolation(self):
         """
@@ -153,7 +155,7 @@ class inexact_line_search:
         zero_factor = self.a0 - self.aL
         # Interpolation step
         denominator = 2*(self.f_aL - self.f_a0 + zero_factor*self.g_aL)
-        new_a0 = zero_sub_factor**2*self.g_aL/denominator
+        new_a0 = zero_factor**2*self.g_aL/denominator
 
         max_factor = self.aL + self.tau*upper_factor
         min_factor = self.aU - self.tau*upper_factor
@@ -182,7 +184,7 @@ class inexact_line_search:
 
         """
         self.f_a0 = self.func_alpha(self.a0)
-        self.g_a0 = self.grad_alpha(self.a0)
+        self.g_a0 = np.dot(self.grad_alpha(self.a0), self.s)
         if new_aL == True:
             self.f_aL = self.func_alpha(self.aL)
-            self.g_aL = self.grad_alpha(self.aL)
+            self.g_aL = np.dot(self.grad_alpha(self.aL), self.s)
