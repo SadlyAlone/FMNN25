@@ -26,10 +26,6 @@ def test_func(x):
     return x[0]**3 + x[0]*x[1] + (x[0]**2)*(x[1]**2) - 3*x[0]
 
 
-#optimization_problem = optimisation_problem_class(rosenbrock)
-#Does not converge for all X due to naive newton implementation.
-#Sometimes we cant invert hessian, sometimes search direction is not descent direction
-
 print('Here we use the regular newton with exact line search on the rosenbrock function, x_0 = [2, 2]')
 input('Press enter to continue')
 

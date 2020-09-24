@@ -1,0 +1,3 @@
+There are three files you can run to test the optimization method.
+These are display_solve.py, test_chebyquad.py and plot_rosenbrock.py
+

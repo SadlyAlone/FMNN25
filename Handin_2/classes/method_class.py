@@ -10,6 +10,7 @@ class optimisation_method_class:
     This is the base optimization class to be extended by other classes
     takes an optimisation_problem_class which describes the objective function: optimisation_problem_class,
      an initial point: x_0,
+     a line search object,
      and a convergence tolerance: tolerance
     """
     def __init__(self, optimisation_problem_class, x_0, tolerance, line_search):
@@ -34,21 +35,28 @@ class optimisation_method_class:
             x = self.update_x(x)
 
             if la.norm(x - x_all[-1]) < self.tolerance:
+                x_all.append(x)
+                print(x)
                 cond = False
         return x_all
-    #Method to be inherited by children
+    """This is the method that updates x using the stepsize and search direction
+    obtained from the specific methods"""
     def update_x(self, x):
 
         dir = self.search_dir(x)
         a = self.line_search_factor(x, dir)
 
         return x + a[0]*dir
+
+    """This returnes the stepsize determined either by inexact line search or exact line search"""
     def line_search_factor(self):
         return 1
-    #Method to be inherited by children
+    """This returns the search direction s given by the specified method"""
     def search_dir(self, x):
         return 1
-
+    """This updates the hessian approximation for the given quasi-newton method"""
+    def update_hessian(self, x, x_old):
+        return 1
 
 class regular_newton(optimisation_method_class):
 
@@ -113,8 +121,6 @@ class bad_broyden(optimisation_method_class):
     def search_dir(self, x):
         gradient = np.array(self.optimisation_problem_class.gradient_approx(x))
 
-        hessian = np.array(self.optimisation_problem_class.hessian_approx(x))
-
         return -self.H_estimate @ gradient
 
     def update_x(self, x):
@@ -149,8 +155,6 @@ class symmetric_broyden(optimisation_method_class):
     def search_dir(self, x):
         gradient = np.array(self.optimisation_problem_class.gradient_approx(x))
 
-        hessian = np.array(self.optimisation_problem_class.hessian_approx(x))
-
         return -self.H_estimate @ gradient
 
     def update_x(self, x):
@@ -174,7 +178,6 @@ class symmetric_broyden(optimisation_method_class):
         a = 1/np.inner(u,gamma)
         self.H_estimate = H + a*np.outer(u,u)
 
-
 class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
 
     def __init__(self, optimisation_problem_class, x_0, tol, line_search):
@@ -187,8 +190,6 @@ class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
     #Calculates the newton direction using approximation methods contained in hessian.py
     def search_dir(self, x):
         gradient = np.array(self.optimisation_problem_class.gradient_approx(x))
-
-        hessian = np.array(self.optimisation_problem_class.hessian_approx(x))
 
         return -self.H_estimate @ gradient
 
@@ -210,6 +211,10 @@ class broyden_fletcher_goldfarb_shanno(optimisation_method_class):
         H = self.H_estimate
         self.H_estimate = H + (1 + (gamma.T@H@gamma)/(np.inner(delta,gamma)))*((np.outer(delta,delta)/np.inner(delta,gamma))) - (np.outer(delta,gamma)@H + H@np.outer(gamma,delta))/(np.inner(delta,gamma))
 
+        #print(la.norm(self.H_estimate - np.linalg.inv(self.exact_hessian(x))))
+
+    #def exact_hessian(self, x):
+    #    return np.array([[-400*(x[1] - x[0]**2) + 800*x[0]**2 + 2, -400*x[0]],[-400*x[0], 200]])
 """
 This is the DFP optimization algorith that extends the general optimisation_method_class
 Unfortunatly I had to update the find_min method since the iteration step is not the same
@@ -235,6 +240,9 @@ class david_fletcher_powell(optimisation_method_class):
 
             if la.norm(x - x_all[-1]) < self.tolerance:
                 cond = False
+                x_all.append(x)
+                print(x)
+
         return x_all
 
     def update_x(self, x, iterations):

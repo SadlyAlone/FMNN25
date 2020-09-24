@@ -1,5 +1,8 @@
 from .hessian import hessian_approximation
 class optimisation_problem_class:
+    """Function is the objective function to be evaluated,
+    h is used to approximate the gradient and the hessian, should be small (close to zero) relative to the function scale,
+    gradient is an optional term if the gradient is actually given"""
     def __init__(self, function, h=1e-5, gradient=None):
         self.function = function
         self.hessian_approximation = hessian_approximation(self.function)
