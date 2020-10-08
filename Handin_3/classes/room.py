@@ -33,7 +33,7 @@ class room:
         for i in range(self.mesh_n):
             self.v[offset + i] = temperature
 
-    def set_room_boundry(self, row, col, dir):
+    def add_room_boundry(self, row, col, dir):
         boundary = np.zeros(self.mesh_n)
         if(dir=="left"):
             offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
@@ -61,7 +61,6 @@ class room:
         m = np.mean(self.v)
         idx = (self.v == 0)
         self.v[idx] = m
-
 
     def coord_to_val(self, x,y):
         return x + y*self.mesh_n*self.cols
