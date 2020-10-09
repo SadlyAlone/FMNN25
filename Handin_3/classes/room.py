@@ -6,6 +6,7 @@ from scipy import sparse
 # import uniform module to create random numbers
 from scipy.stats import uniform
 import time
+import math
 
 
 
@@ -23,10 +24,27 @@ class room:
         row = np.array([-4,1]+ (self.steps_x-2)*[0.] + [1] + (self.mesh_n**2 - self.mesh_n - 1)*[0.])
         padding = len(self.v) - len(row)
         row = np.append(row, np.zeros(padding))
-        #self.A = la.toeplitz(row)
+
+        A = la.toeplitz(row)
+        D = self.get_D_matrix(A)
+
+        self.A = sparse.csc_matrix(A)
+        self.D = sparse.csc_matrix(D)
+
 
         self.outer_points = []
-        self.A = sparse.csr_matrix(la.toeplitz(row))
+
+    def get_D_matrix(self, A):
+        D = np.copy(self.A)
+        for i in range(1,self.steps_y):
+            n = i*self.steps_x-1
+            print(n)
+
+            D[n+1,n] = 0
+            D[n,n+1] = 0
+            
+        return D
+
 
     #Indexed from 0
     def set_left(self, row, col, temperature):
@@ -105,7 +123,8 @@ class room:
 
     def val_to_coord(self, n):
         x = n % self.mesh_n*self.rows
-        y = n % self.mesh_n*self.cols
+        y = math.floor(n / self.mesh_n)
+        return x,y
 
     def print_v(self):
         new_v = self.v.reshape(self.steps_y, self.steps_x)

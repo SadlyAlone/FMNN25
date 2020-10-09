@@ -1,5 +1,5 @@
 from classes.room import room
-mesh_n = 4
+mesh_n = 3
 
 r1 = room(1,1,mesh_n)
 r1.set_top(0,0,15)
@@ -9,6 +9,7 @@ r1.fill_v()
 r1.add_room_boundry(0,0,"right")
 
 r1.print_v()
+
 
 r2 = room(1,2,mesh_n)
 r2.set_top(0,0,40)
@@ -20,6 +21,7 @@ r2.add_room_boundry(0,1,"left")
 r2.fill_v()
 
 r2.print_v()
+
 
 r3 = room(1,1,mesh_n)
 r3.set_top(0,0,15)

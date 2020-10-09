@@ -1,4 +1,6 @@
 from classes.room import room
+from scipy.sparse.linalg import spsolve
+from scipy.sparse import csc_matrix
 mesh_n = 4
 
 r1 = room(1,1,mesh_n)
@@ -16,6 +18,8 @@ print("The initial r1")
 print()
 r1.update_inner()
 r1.print_v()
+
+
 
 print("r1 with updated inner points")
 print()
