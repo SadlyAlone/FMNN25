@@ -23,10 +23,10 @@ class room:
         row = np.array([-4,1]+ (self.steps_x-2)*[0.] + [1] + (self.mesh_n**2 - self.mesh_n - 1)*[0.])
         padding = len(self.v) - len(row)
         row = np.append(row, np.zeros(padding))
-        self.A = la.toeplitz(row)
+        #self.A = la.toeplitz(row)
 
         self.outer_points = []
-        #self.A = sparse.csr_matrix(la.toeplitz(row))
+        self.A = sparse.csr_matrix(la.toeplitz(row))
 
     #Indexed from 0
     def set_left(self, row, col, temperature):
