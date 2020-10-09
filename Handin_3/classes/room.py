@@ -1,5 +1,12 @@
 
 import numpy as np
+import scipy.linalg as la
+# import sparse module from SciPy package
+from scipy import sparse
+# import uniform module to create random numbers
+from scipy.stats import uniform
+import time
+
 
 
 class room:
@@ -11,51 +18,82 @@ class room:
         self.steps_y = cols*mesh_n
         self.boundries = []
         self.v = np.zeros(rows*cols*mesh_n*mesh_n)
+        step_size = self.mesh_n
+
+        row = np.array([-4,1]+ (self.steps_x-2)*[0.] + [1] + (self.mesh_n**2 - self.mesh_n - 1)*[0.])
+        padding = len(self.v) - len(row)
+        row = np.append(row, np.zeros(padding))
+        self.A = la.toeplitz(row)
+
+        self.outer_points = []
+        #self.A = sparse.csr_matrix(la.toeplitz(row))
 
     #Indexed from 0
     def set_left(self, row, col, temperature):
         offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
         for i in range(self.mesh_n):
-            self.v[offset + self.steps_x *i] = temperature
+            index = offset + self.steps_x *i
+            self.v[index] = temperature
+            self.outer_points.append(index)
 
     def set_right(self, row, col, temperature):
         offset = self.mesh_n -1 + row*self.mesh_n + col*self.steps_x*self.mesh_n
         for i in range(self.mesh_n):
-            self.v[offset + self.steps_x*i] = temperature
+            index = offset + self.steps_x*i
+            self.v[index] = temperature
+            self.outer_points.append(index)
 
     def set_top(self, row, col, temperature):
         offset = self.mesh_n*self.steps_x*col + self.mesh_n*row
         for i in range(self.mesh_n):
-            self.v[offset + i] = temperature
+            index = offset +i
+            self.v[index] = temperature
+            self.outer_points.append(index)
 
     def set_bottom(self, row, col, temperature):
         offset = (self.mesh_n-1)*self.steps_x + row*self.mesh_n + col*self.mesh_n*self.steps_x
         for i in range(self.mesh_n):
-            self.v[offset + i] = temperature
+            index = offset + i
+            self.v[index] = temperature
+            self.outer_points.append(index)
 
-    def add_room_boundry(self, row, col, dir):
+    def add_room_boundry(self, row, col, side):
         boundary = np.zeros(self.mesh_n)
-        if(dir=="left"):
+        if(side=="left"):
             offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
             for i in range(self.mesh_n):
-                boundary[i] = offset + self.steps_x *i
+                index = offset + self.steps_x *i
+                boundary[i] = index
+                self.outer_points.append(index)
 
-        elif(dir=="right"):
+        elif(side=="right"):
             offset = self.mesh_n -1 + row*self.mesh_n + col*self.steps_x*self.mesh_n
             for i in range(self.mesh_n):
-                boundary[i] = offset + self.steps_x*i
+                index = offset + self.steps_x*i
+                boundary[i] = index
+                self.outer_points.append(index)
 
-        elif(dir=="top"):
+        elif(side=="top"):
             offset = self.mesh_n*self.steps_x*col + self.mesh_n*row
             for i in range(self.mesh_n):
-                boundary[i] = offset + i
+                index = offset + i
+                boundary[i] = index
+                self.outer_points.append(index)
 
-        elif(dir=="bottom"):
+        elif(side=="bottom"):
             offset = (self.mesh_n-1)*self.steps_x + row*self.mesh_n + col*self.mesh_n*self.steps_x
             for i in range(self.mesh_n):
-                boundary[i] = offset + i
+                index = offset + i
+                boundary[i] = index
+                self.outer_points.append(index)
 
-        self.boundries.append(boundary)
+        self.boundries.append(boundary.astype(int))
+
+    def update_inner(self):
+        inner_points = self.get_inner_points()
+        A = self.A[inner_points, :]
+        self.v[inner_points] = A @ self.v
+        return A @ self.v
 
     def fill_v(self):
         m = np.mean(self.v)
@@ -72,3 +110,9 @@ class room:
     def print_v(self):
         new_v = self.v.reshape(self.steps_y, self.steps_x)
         print(new_v)
+
+    def get_outer_points(self):
+        return list(set(self.outer_points))
+
+    def get_inner_points(self):
+        return list(set(range(len(self.v))) - set(self.outer_points))
