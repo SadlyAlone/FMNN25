@@ -3,6 +3,7 @@ import numpy as np
 import scipy.linalg as la
 # import sparse module from SciPy package
 from scipy import sparse
+from .laplacian_solver import laplacian_solver
 # import uniform module to create random numbers
 from scipy.stats import uniform
 import time
@@ -21,29 +22,42 @@ class room:
         self.v = np.zeros(rows*cols*mesh_n*mesh_n)
         step_size = self.mesh_n
 
+
+
         row = np.array([-4,1]+ (self.steps_x-2)*[0.] + [1] + (self.mesh_n**2 - self.mesh_n - 1)*[0.])
         padding = len(self.v) - len(row)
         row = np.append(row, np.zeros(padding))
 
+        """
         A = la.toeplitz(row)
         D = self.get_D_matrix(A)
 
         self.A = sparse.csc_matrix(A)
         self.D = sparse.csc_matrix(D)
-
+        """
 
         self.outer_points = []
 
-    def get_D_matrix(self, A):
-        D = np.copy(self.A)
-        for i in range(1,self.steps_y):
-            n = i*self.steps_x-1
-            print(n)
 
-            D[n+1,n] = 0
-            D[n,n+1] = 0
+    def __call__(self):
+        if(self.condition=="dirichlet"):
+            v = self.v.reshape(self.steps_y, self.steps_x)
+            up = v[0,1:self.steps_x-1]
+            left = v[1:self.steps_y-1,0]
+            right = v[1:self.steps_y-1,-1]
+            down = v[-1,1:self.steps_x-1]
+            b = np.zeros((self.steps_y-2, self.steps_x-2))
+            b[0,:] +=  up
+            b[:, 0] +=  left
+            b[:, -1] += right
+            b[-1, :] += down
+
+            print(b.flatten())
+            print(self.omega(b.flatten()))
+        elif(self.condition=="neumann"):
+            v = self.v.reshape(self.steps_y, self.steps_x)
             
-        return D
+        self.v[self.get_inner_points()] = self.omega(b.flatten())
 
 
     #Indexed from 0
@@ -75,7 +89,7 @@ class room:
             self.v[index] = temperature
             self.outer_points.append(index)
 
-    def add_room_boundry(self, row, col, side):
+    def add_room_boundry(self, row, col, side, condition):
         boundary = np.zeros(self.mesh_n)
         if(side=="left"):
             offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
@@ -91,6 +105,7 @@ class room:
                 boundary[i] = index
                 self.outer_points.append(index)
 
+
         elif(side=="top"):
             offset = self.mesh_n*self.steps_x*col + self.mesh_n*row
             for i in range(self.mesh_n):
@@ -105,14 +120,24 @@ class room:
                 boundary[i] = index
                 self.outer_points.append(index)
 
-        self.boundries.append(boundary.astype(int))
+        if(condition == "dirichlet"):
 
+            self.omega =  laplacian_solver(self.steps_y-2, self.steps_x-2, condition)
+            self.conditon = "dirichlet"
+        elif(condition == "neumann"):
+            self.conditon = "neumann"
+            if(side == "left" or side == "right"):
+                self.omega =  laplacian_solver(self.steps_y-2,self.steps_x-1, condition, side)
+            elif(side == "bottom" or side == "top"):
+                self.omega =  laplacian_solver(self.steps_y-1,self.steps_x-2, condition, side)
+        self.boundries.append(boundary.astype(int))
+    """
     def update_inner(self):
         inner_points = self.get_inner_points()
         A = self.A[inner_points, :]
         self.v[inner_points] = A @ self.v
         return A @ self.v
-
+    """
     def fill_v(self):
         m = np.mean(self.v)
         idx = (self.v == 0)

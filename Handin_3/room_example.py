@@ -1,4 +1,5 @@
 from classes.room import room
+
 mesh_n = 3
 
 r1 = room(1,1,mesh_n)
