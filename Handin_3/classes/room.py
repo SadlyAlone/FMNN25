@@ -18,7 +18,8 @@ class room:
         self.mesh_n = mesh_n
         self.steps_x = rows*mesh_n
         self.steps_y = cols*mesh_n
-        self.boundries = []
+        self.boundary = []
+        self.condition = ""
         self.v = np.zeros(rows*cols*mesh_n*mesh_n)
         step_size = self.mesh_n
 
@@ -39,25 +40,80 @@ class room:
         self.outer_points = []
 
 
-    def __call__(self):
+    def __call__(self, beyond_points = None):
+        v = self.v.reshape(self.steps_y, self.steps_x)
+        beyond_points
+        v = self.v.reshape(self.steps_y, self.steps_x)
+        top = v[0,1:self.steps_x-1]
+        left = v[1:self.steps_y-1,0]
+        right = v[1:self.steps_y-1,-1]
+        bottom = v[-1,1:self.steps_x-1]
+        b = np.zeros((self.steps_y-2, self.steps_x-2))
+        b[0,:] +=  top
+        b[:, 0] +=  left
+        b[:, -1] += right
+        b[-1, :] += bottom
         if(self.condition=="dirichlet"):
-            v = self.v.reshape(self.steps_y, self.steps_x)
-            up = v[0,1:self.steps_x-1]
-            left = v[1:self.steps_y-1,0]
-            right = v[1:self.steps_y-1,-1]
-            down = v[-1,1:self.steps_x-1]
-            b = np.zeros((self.steps_y-2, self.steps_x-2))
-            b[0,:] +=  up
-            b[:, 0] +=  left
-            b[:, -1] += right
-            b[-1, :] += down
-
             print(b.flatten())
             print(self.omega(b.flatten()))
+            self.v[self.get_inner_points()] = self.omega(b.flatten())
+
         elif(self.condition=="neumann"):
-            v = self.v.reshape(self.steps_y, self.steps_x)
-            
-        self.v[self.get_inner_points()] = self.omega(b.flatten())
+            b_direction = self.omega.b_direction
+            b_new = beyond_points
+
+            if(b_direction=="top"):
+                b[0,:] -= top
+                b_new -= top
+                b_new[0] += v[0,0]
+                b_new[-1] += v[0,-1]
+
+                b = np.vstack((b_new, b))
+                v_new = self.omega.reconstruct(self.omega(b.flatten()))
+                self.v[self.get_inner_points()] = v_new[1:,:].flatten()
+                self.v[self.boundary[1:-1]] = v_new[0,:].flatten()
+
+            elif(b_direction=="bottom"):
+                b[-1, :] -= bottom
+                b_new -= bottom
+                b_new[0] += v[-1,0]
+                b_new[-1] += v[-1,-1]
+
+                b = np.vstack((b, b_new))
+                v_new = self.omega.reconstruct(self.omega(b.flatten()))
+
+                self.v[self.get_inner_points()] = v_new[:-1,:].flatten()
+                self.v[self.boundary[1:-1]] = v_new[-1,:].flatten()
+
+            elif(b_direction=="left"):
+                b[:, 0] -= left
+                b_new -= left
+                b_new[0] += v[0,0]
+                b_new[-1] += v[-1,0]
+                b_new = b_new.reshape(len(b_new),1)
+
+
+                b = np.hstack((b_new,b))
+
+                v_new = self.omega.reconstruct(self.omega(b.flatten()))
+                self.print_v()
+                self.v[self.get_inner_points()] = v_new[:,1:].flatten()
+                self.v[self.boundary[1:-1]] = v_new[:,1].flatten()
+                self.print_v()
+
+            elif(b_direction=="right"):
+                b[:, -1] -= right
+                b_new -= right
+                b_new[0] += v[0,-1]
+                b_new[-1] += v[-1,-1]
+                b_new = b_new.reshape(len(b_new),1)
+
+                b = np.hstack((b, b_new))
+                v_new = self.omega.reconstruct(self.omega(b.flatten()))
+
+                self.v[self.get_inner_points()] = v_new[:,:-1].flatten()
+                self.v[self.boundary[1:-1]] = v_new[:,-1].flatten()
+
 
 
     #Indexed from 0
@@ -89,7 +145,7 @@ class room:
             self.v[index] = temperature
             self.outer_points.append(index)
 
-    def add_room_boundry(self, row, col, side, condition):
+    def add_room_boundary(self, row, col, side, condition):
         boundary = np.zeros(self.mesh_n)
         if(side=="left"):
             offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
@@ -123,14 +179,14 @@ class room:
         if(condition == "dirichlet"):
 
             self.omega =  laplacian_solver(self.steps_y-2, self.steps_x-2, condition)
-            self.conditon = "dirichlet"
+            self.condition = "dirichlet"
         elif(condition == "neumann"):
-            self.conditon = "neumann"
+            self.condition = "neumann"
             if(side == "left" or side == "right"):
                 self.omega =  laplacian_solver(self.steps_y-2,self.steps_x-1, condition, side)
             elif(side == "bottom" or side == "top"):
                 self.omega =  laplacian_solver(self.steps_y-1,self.steps_x-2, condition, side)
-        self.boundries.append(boundary.astype(int))
+        self.boundary = boundary.astype(int)
     """
     def update_inner(self):
         inner_points = self.get_inner_points()

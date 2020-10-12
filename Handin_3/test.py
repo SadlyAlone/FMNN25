@@ -1,24 +1,24 @@
 from classes.room import room
 from scipy.sparse.linalg import spsolve
+from mpi4py import MPI
 from scipy.sparse import csc_matrix
 mesh_n = 5
-"""
+
 r1 = room(1,1,mesh_n)
 r1.set_top(0,0,15)
 r1.set_bottom(0,0,15)
 r1.set_left(0,0,40)
-r1.set_right(0,0,15)
+r1.set_right(0,0,5)
 
 #r1.fill_v()
-r1.add_room_boundry(0,0,"right","dirichlet")
+r1.add_room_boundry(0,0,"left","neumann")
 
 #r1.print_v()
 
 #r1.update_inner()
-r1.print_v()
-print(r1.omega.A_matrix.todense())
-r1()
-r1.print_v()
+#r1.print_v()
+r1([30,30,30])
+#r1.print_v()
 """
 r2 = room(1,2,mesh_n)
 r2.set_top(0,0,40)
@@ -32,3 +32,4 @@ r2.add_room_boundry(0,1,"left", "dirichlet")
 r2.print_v()
 r2()
 r2.print_v()
+"""
