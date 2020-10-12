@@ -42,8 +42,6 @@ class room:
 
     def __call__(self, beyond_points = None):
         v = self.v.reshape(self.steps_y, self.steps_x)
-        beyond_points
-        v = self.v.reshape(self.steps_y, self.steps_x)
         top = v[0,1:self.steps_x-1]
         left = v[1:self.steps_y-1,0]
         right = v[1:self.steps_y-1,-1]
@@ -54,8 +52,8 @@ class room:
         b[:, -1] += right
         b[-1, :] += bottom
         if(self.condition=="dirichlet"):
-            print(b.flatten())
-            print(self.omega(b.flatten()))
+            #print(b.flatten())
+            #print(self.omega(b.flatten()))
             self.v[self.get_inner_points()] = self.omega(b.flatten())
 
         elif(self.condition=="neumann"):
@@ -64,7 +62,7 @@ class room:
 
             if(b_direction=="top"):
                 b[0,:] -= top
-                b_new -= top
+                #b_new -= top
                 b_new[0] += v[0,0]
                 b_new[-1] += v[0,-1]
 
@@ -75,8 +73,8 @@ class room:
 
             elif(b_direction=="bottom"):
                 b[-1, :] -= bottom
-                b_new -= bottom
-                b_new[0] += v[-1,0]
+                #b_new -= bottom
+                b_new[0] = v[-1,0]
                 b_new[-1] += v[-1,-1]
 
                 b = np.vstack((b, b_new))
@@ -87,7 +85,8 @@ class room:
 
             elif(b_direction=="left"):
                 b[:, 0] -= left
-                b_new -= left
+
+                #b_new -= left
                 b_new[0] += v[0,0]
                 b_new[-1] += v[-1,0]
                 b_new = b_new.reshape(len(b_new),1)
@@ -96,14 +95,14 @@ class room:
                 b = np.hstack((b_new,b))
 
                 v_new = self.omega.reconstruct(self.omega(b.flatten()))
-                self.print_v()
+
                 self.v[self.get_inner_points()] = v_new[:,1:].flatten()
                 self.v[self.boundary[1:-1]] = v_new[:,1].flatten()
-                self.print_v()
 
             elif(b_direction=="right"):
                 b[:, -1] -= right
-                b_new -= right
+
+                #b_new -= right
                 b_new[0] += v[0,-1]
                 b_new[-1] += v[-1,-1]
                 b_new = b_new.reshape(len(b_new),1)
