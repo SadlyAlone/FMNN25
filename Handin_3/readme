@@ -1,0 +1,2 @@
+To see how the code executes with parallel execution run the command: mpiexec -n 3 python room_example.py in the project directory.
+To see a small showcase of the room class, run the command: python3 showcase.py in the project directory

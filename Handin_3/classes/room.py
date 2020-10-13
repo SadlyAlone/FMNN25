@@ -9,6 +9,10 @@ from scipy.stats import uniform
 import time
 import math
 
+"""
+This class is used to represent one of the rooms. It is initialized by giving
+the dimensions of the room rowsXcols and the number mesh_n that we want to divide each axis into
+"""
 
 
 class room:
@@ -22,24 +26,15 @@ class room:
         self.condition = ""
         self.v = np.zeros(rows*cols*mesh_n*mesh_n)
         step_size = self.mesh_n
-
-
-
-        row = np.array([-4,1]+ (self.steps_x-2)*[0.] + [1] + (self.mesh_n**2 - self.mesh_n - 1)*[0.])
-        padding = len(self.v) - len(row)
-        row = np.append(row, np.zeros(padding))
-
-        """
-        A = la.toeplitz(row)
-        D = self.get_D_matrix(A)
-
-        self.A = sparse.csc_matrix(A)
-        self.D = sparse.csc_matrix(D)
-        """
-
         self.outer_points = []
 
-
+    """
+    This method is used to solve a rooms dirichlet or neumann condition. For Dirlicht
+    it simply updates the inner points in the roomself.
+    For neumann the relevant inner points of the rooom with the Dirichlet conditons are passed alongself.
+    The conditions, and their direction (if relevant) are saved in the class when defining boundries in
+    add_room_boundary().
+    """
     def __call__(self, beyond_points = None):
         v = self.v.reshape(self.steps_y, self.steps_x)
         top = v[0,1:self.steps_x-1]
@@ -116,6 +111,12 @@ class room:
 
 
     #Indexed from 0
+    """
+    These methods are used to set the temperatues at the boundries (walls, windows)
+    If a room is larger than 1x1 you must also specify which part of the room, and which side.
+    For the rest of the code to work correctly all boundries must be given a temperature, as a vector
+    keeping track of the outer points is also defined and saved here
+    """
     def set_left(self, row, col, temperature):
         offset = row*self.mesh_n + col*self.steps_x*self.mesh_n
         for i in range(self.mesh_n):
@@ -144,6 +145,10 @@ class room:
             self.v[index] = temperature
             self.outer_points.append(index)
 
+    """This is where you add a room boundry. It saves which condition the boundry has
+    and also which indices in the boundry has. The laplacian_solver class saved as self.omega, which solves
+    the neumann or dirichlet conditon is also defined here
+    """
     def add_room_boundary(self, row, col, side, condition):
         boundary = np.zeros(self.mesh_n)
         if(side=="left"):
@@ -186,32 +191,20 @@ class room:
             elif(side == "bottom" or side == "top"):
                 self.omega =  laplacian_solver(self.steps_y-1,self.steps_x-2, condition, side)
         self.boundary = boundary.astype(int)
-    """
-    def update_inner(self):
-        inner_points = self.get_inner_points()
-        A = self.A[inner_points, :]
-        self.v[inner_points] = A @ self.v
-        return A @ self.v
-    """
+
+    #This method is used to set all zero points in a room to the average temperature in the room
     def fill_v(self):
         m = np.mean(self.v)
         idx = (self.v == 0)
         self.v[idx] = m
 
-    def coord_to_val(self, x,y):
-        return x + y*self.mesh_n*self.cols
-
-    def val_to_coord(self, n):
-        x = n % self.mesh_n*self.rows
-        y = math.floor(n / self.mesh_n)
-        return x,y
-
+    #Prints v as a matrix
     def print_v(self):
         new_v = self.v.reshape(self.steps_y, self.steps_x)
         print(new_v)
-
+    #Returnes all the outer points(Walls, windows, heaters, boundries) for a given room
     def get_outer_points(self):
         return list(set(self.outer_points))
-
+    #Returnes all the interior points for a room
     def get_inner_points(self):
         return list(set(range(len(self.v))) - set(self.outer_points))
